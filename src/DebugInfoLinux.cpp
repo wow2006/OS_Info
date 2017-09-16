@@ -3,13 +3,15 @@
 #include <fstream>
 #include <sstream>
 #include <sys/utsname.h>
+#include <gnu/libc-version.h>
 
 /**
 Going from the lower level up, we want:
 - [x] Kernel and CPU architecture info, that's uname()
 - [x] CPU model name, /proc/cpuinfo "model name" line
-- [ ] Distro info, that lsb-release or os-release
-- [ ] Possibly libc version, for glibc check preprocessor variable __GNU_LIBRARY__ and use gnu_get_glibc_version
+- [x] Memory Ram, /proc/meminfo
+- [x] Distro info, that lsb-release or os-release
+- [x] Possibly libc version, for glibc check preprocessor variable __GNU_LIBRARY__ and use gnu_get_glibc_version
 - [ ] Display server, use SDL_GetWindowWMInfo
 - [ ] Windowing/input toolkit version, use SDL_GetVersion
 - [ ] GL version and driver vendor, use OpenGL version call info*
@@ -225,4 +227,8 @@ std::string SystemInfo::getOS_Version() {
     if(!isInitlized())
         return "Unknown";
     return mInfo["Distro"]["VERSION"];
+}
+
+std::string SystemInfo::getLibC_Version() {
+  return gnu_get_libc_version();
 }
