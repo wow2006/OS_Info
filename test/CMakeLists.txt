@@ -14,3 +14,8 @@ add_test(NAME KernelTest COMMAND KernelTest)
 add_executable(CpuTest CpuTest.cpp)
 target_link_libraries(CpuTest SystemInfo Catch)
 add_test(NAME CpuTest COMMAND CpuTest)
+
+add_executable(MemTest memtest.cpp)
+target_link_libraries(MemTest SystemInfo Catch)
+target_include_directories(MemTest PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+add_test(NAME MemTest COMMAND MemTest)

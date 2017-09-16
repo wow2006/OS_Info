@@ -11,15 +11,21 @@ static std::string getKernel_Arch();
 
 static std::string getKernel_Release();
 
-static std::string getOS_Name();
-
-static std::string getOS_Version();
-
 static std::string getCPU_Name();
 
 static std::string getCPU_Vendor();
 
-static std::size_t getRAM_Size();
+static std::string getCPU_Cache();
+
+static std::string getCPU_Cores();
+
+static std::string getMem_Total();
+
+static std::string getMem_Free();
+
+static std::string getOS_Name();
+
+static std::string getOS_Version();
 
 static std::string getGPU_Name();
 
