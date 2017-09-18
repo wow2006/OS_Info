@@ -1,0 +1,8 @@
+dist:     trusty
+sudo:     false
+language: cpp
+
+script:
+    - git submodule --init update
+    - cmake .
+    - cmake --build . -- -j2
