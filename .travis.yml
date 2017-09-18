@@ -13,6 +13,6 @@ addons:
 script:
   - git fetch --all
   - git reset --hard origin/master
-  - git submodule --init update
+  - git submodule update --init
   - CXX=/usr/bin/g++-5 CC=/usr/bin/gcc-5 cmake -D ENABLE_COVERAGE:BOOL=TRUE . 
   - cmake --build . -- -j2
