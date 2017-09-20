@@ -7,22 +7,11 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 
-/**
-Going from the lower level up, we want:
-- [x] Kernel and CPU architecture info, that's uname()
-- [x] CPU model name, /proc/cpuinfo "model name" line
-- [x] Memory Ram, /proc/meminfo
-- [x] Distro info, that lsb-release or os-release
-- [x] Possibly libc version, for glibc check preprocessor variable __GNU_LIBRARY__ and use gnu_get_glibc_version
-- [ ] Display server, use SDL_GetWindowWMInfo
-- [ ] Windowing/input toolkit version, use SDL_GetVersion
-- [ ] GL version and driver vendor, use OpenGL version call info*
- */
-
 std::unordered_map<std::string,
     std::unordered_map<std::string, std::string>> SystemInfo::mInfo
 { {"Kernel", {}}, {"Distro", {}}, {"CPU", {}}, {"Mem", {}},
-  {"GLibC", {}}, {"DisplayServer", {}} };
+  {"GLibC", {}}, {"DisplayServer", {}}, {"SDL_Version", {}},
+  {"GL_Version", {}} };
 
 using map = std::unordered_map<std::string, std::string>;
 
@@ -129,7 +118,8 @@ bool read_glibc(map& info) {
   info["version"] = gnu_get_libc_version();
   return !info["version"].empty();
 }
-bool read_displayServer(map& info) {
+bool read_SDL(map& info) {
+  if(!info.empty()) return true;
   SDL_Init(0);
   SDL_SysWMinfo sysinfo;
   SDL_Window* window = SDL_CreateWindow("", 0, 0, 0, 0, SDL_WINDOW_HIDDEN);
@@ -164,9 +154,14 @@ bool read_displayServer(map& info) {
   SDL_Quit();
   return true;
 }
-
-bool read_windowAndInput() { return false; }
-bool read_glInfo() { return false; }
+bool read_windowAndInput(map& info) {
+  if(!info.empty()) return true;
+  return false;
+}
+bool read_glInfo(map& info) {
+  if(!info.empty()) return true;
+  return false;
+}
 
 bool SystemInfo::isInitlized() {
     // Read Kernal Info
@@ -188,11 +183,13 @@ bool SystemInfo::isInitlized() {
     read_glibc(glibc);
     // Read Display Server
     auto& displayServer = mInfo["DisplayServer"];
-    read_displayServer(displayServer);
+    read_SDL(displayServer);
     // Read Windowing and input
-    read_windowAndInput();
+    auto& sdl = mInfo["SDL_Version"];
+    read_windowAndInput(sdl);
     // Read OpenGL
-    read_glInfo();
+    auto& glVersion = mInfo["GL_Version"];
+    read_glInfo(glVersion);
 
     return true;
 }
