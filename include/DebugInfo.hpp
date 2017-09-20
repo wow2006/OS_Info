@@ -29,6 +29,8 @@ static std::string getOS_Version();
 
 static std::string getLibC_Version();
 
+static std::string getDisplayServer();
+
 static std::string getGPU_Name();
 
 static std::string getGPU_Vendor();

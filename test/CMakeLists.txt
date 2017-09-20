@@ -1,4 +1,5 @@
-set(CATCH_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/Catch/include CACHE INTERNAL "Path to include folder for Catch")
+set(CATCH_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/Catch/include
+    CACHE INTERNAL "Path to include folder for Catch")
 
 add_library(Catch INTERFACE)
 target_include_directories(Catch INTERFACE ${CATCH_INCLUDE_DIR})
@@ -15,3 +16,8 @@ add_custom_test(KernelTest)
 add_custom_test(CpuTest)
 add_custom_test(MemTest)
 add_custom_test(libcTest)
+find_package(SDL2 REQUIRED)
+add_custom_test(SDL2Test)
+
+target_include_directories(SDL2Test PUBLIC ${SDL2_INCLUDE_DIR})
+target_link_libraries(SDL2Test ${SDL2_LIBRARY})

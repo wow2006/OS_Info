@@ -4,6 +4,8 @@
 #include <sstream>
 #include <sys/utsname.h>
 #include <gnu/libc-version.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_syswm.h>
 
 /**
 Going from the lower level up, we want:
@@ -19,7 +21,8 @@ Going from the lower level up, we want:
 
 std::unordered_map<std::string,
     std::unordered_map<std::string, std::string>> SystemInfo::mInfo
-{ {"Kernel", {}}, {"Distro", {}}, {"CPU", {}}, {"Mem", {}} };
+{ {"Kernel", {}}, {"Distro", {}}, {"CPU", {}}, {"Mem", {}},
+  {"GLibC", {}}, {"DisplayServer", {}} };
 
 using map = std::unordered_map<std::string, std::string>;
 
@@ -122,8 +125,46 @@ bool read_lsbRelease(map& info) {
   }
   return false;
 }
-bool read_glibc() { return false; }
-bool read_displayServer() { return false; }
+bool read_glibc(map& info) {
+  info["version"] = gnu_get_libc_version();
+  return !info["version"].empty();
+}
+bool read_displayServer(map& info) {
+  SDL_Init(0);
+  SDL_SysWMinfo sysinfo;
+  SDL_Window* window = SDL_CreateWindow("", 0, 0, 0, 0, SDL_WINDOW_HIDDEN);
+  if(!window)
+    return false;
+
+  SDL_VERSION(&sysinfo.version);
+  SDL_GetWindowWMInfo(window, &sysinfo);
+  switch(sysinfo.subsystem) {
+    case SDL_SYSWM_UNKNOWN:   break;
+    case SDL_SYSWM_WINDOWS:   info["subsystem"] = "Microsoft Windows(TM)";  break;
+    case SDL_SYSWM_X11:       info["subsystem"] = "X Window System";        break;
+#if SDL_VERSION_ATLEAST(2, 0, 3)
+    case SDL_SYSWM_WINRT:     info["subsystem"] = "WinRT";                  break;
+#endif
+    case SDL_SYSWM_DIRECTFB:  info["subsystem"] = "DirectFB";               break;
+    case SDL_SYSWM_COCOA:     info["subsystem"] = "Apple OS X";             break;
+    case SDL_SYSWM_UIKIT:     info["subsystem"] = "UIKit";                  break;
+#if SDL_VERSION_ATLEAST(2, 0, 2)
+    case SDL_SYSWM_WAYLAND:   info["subsystem"] = "Wayland";                break;
+    case SDL_SYSWM_MIR:       info["subsystem"] = "Mir";                    break;
+#endif
+#if SDL_VERSION_ATLEAST(2, 0, 4)
+    case SDL_SYSWM_ANDROID:   info["subsystem"] = "Android";                break;
+#endif
+#if SDL_VERSION_ATLEAST(2, 0, 5)
+    case SDL_SYSWM_VIVANTE:   info["subsystem"] = "Vivante";                break;
+#endif
+  }
+
+  SDL_DestroyWindow(window);
+  SDL_Quit();
+  return true;
+}
+
 bool read_windowAndInput() { return false; }
 bool read_glInfo() { return false; }
 
@@ -143,9 +184,11 @@ bool SystemInfo::isInitlized() {
         read_lsbRelease(distroInfo);
     }
     // Read libc Info
-    read_glibc();
+    auto& glibc = mInfo["GLibC"];
+    read_glibc(glibc);
     // Read Display Server
-    read_displayServer();
+    auto& displayServer = mInfo["DisplayServer"];
+    read_displayServer(displayServer);
     // Read Windowing and input
     read_windowAndInput();
     // Read OpenGL
@@ -230,5 +273,15 @@ std::string SystemInfo::getOS_Version() {
 }
 
 std::string SystemInfo::getLibC_Version() {
-  return gnu_get_libc_version();
+  auto& glib = mInfo["GLibC"];
+  if(!isInitlized())
+    return "Unknow";
+  return glib["version"];
+}
+
+std::string SystemInfo::getDisplayServer() {
+  auto& displayServer = mInfo["DisplayServer"];
+  if(!isInitlized())
+    return "Unknow";
+  return displayServer["subsystem"];
 }
