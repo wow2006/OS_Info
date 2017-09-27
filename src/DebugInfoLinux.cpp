@@ -6,12 +6,9 @@
 #include <gnu/libc-version.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
+#include <GL/gl.h>
 
-std::unordered_map<std::string,
-    std::unordered_map<std::string, std::string>> SystemInfo::mInfo
-{ {"Kernel", {}}, {"Distro", {}}, {"CPU", {}}, {"Mem", {}},
-  {"GLibC", {}}, {"DisplayServer", {}}, {"SDL_Version", {}},
-  {"GL_Version", {}} };
+std::array<SystemInfo::stringMap, 9> SystemInfo::mInfo;
 
 using map = std::unordered_map<std::string, std::string>;
 
@@ -118,140 +115,172 @@ bool read_glibc(map& info) {
   info["version"] = gnu_get_libc_version();
   return !info["version"].empty();
 }
-bool read_SDL(map& info) {
-  if(!info.empty()) return true;
-  SDL_Init(0);
+bool read_SDL(map& sdlVersion, map& displayServer,
+              map& glVersionInfo, map& gpu) {
+  if(SDL_Init(SDL_INIT_VIDEO) < 0) {
+      std::cerr << "Can not Create SDL init\n";
+      return false;
+  }
+
   SDL_SysWMinfo sysinfo;
-  SDL_Window* window = SDL_CreateWindow("", 0, 0, 0, 0, SDL_WINDOW_HIDDEN);
+  SDL_Window* window = SDL_CreateWindow("", 0, 0, 0, 0, SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL);
+  auto maincontext = SDL_GL_CreateContext(window);
   if(!window)
     return false;
 
-  SDL_VERSION(&sysinfo.version);
+  SDL_GetVersion(&sysinfo.version);
+
+  std::string version = std::to_string(sysinfo.version.major) + "." +
+                        std::to_string(sysinfo.version.minor);
+  sdlVersion["version"].swap(version);
+
   SDL_GetWindowWMInfo(window, &sysinfo);
   switch(sysinfo.subsystem) {
     case SDL_SYSWM_UNKNOWN:   break;
-    case SDL_SYSWM_WINDOWS:   info["subsystem"] = "Microsoft Windows(TM)";  break;
-    case SDL_SYSWM_X11:       info["subsystem"] = "X Window System";        break;
+    case SDL_SYSWM_WINDOWS:   displayServer["subsystem"] = "Microsoft Windows(TM)";  break;
+    case SDL_SYSWM_X11:       displayServer["subsystem"] = "X Window System";        break;
 #if SDL_VERSION_ATLEAST(2, 0, 3)
-    case SDL_SYSWM_WINRT:     info["subsystem"] = "WinRT";                  break;
+    case SDL_SYSWM_WINRT:     displayServer["subsystem"] = "WinRT";                  break;
 #endif
-    case SDL_SYSWM_DIRECTFB:  info["subsystem"] = "DirectFB";               break;
-    case SDL_SYSWM_COCOA:     info["subsystem"] = "Apple OS X";             break;
-    case SDL_SYSWM_UIKIT:     info["subsystem"] = "UIKit";                  break;
+    case SDL_SYSWM_DIRECTFB:  displayServer["subsystem"] = "DirectFB";               break;
+    case SDL_SYSWM_COCOA:     displayServer["subsystem"] = "Apple OS X";             break;
+    case SDL_SYSWM_UIKIT:     displayServer["subsystem"] = "UIKit";                  break;
 #if SDL_VERSION_ATLEAST(2, 0, 2)
-    case SDL_SYSWM_WAYLAND:   info["subsystem"] = "Wayland";                break;
-    case SDL_SYSWM_MIR:       info["subsystem"] = "Mir";                    break;
+    case SDL_SYSWM_WAYLAND:   displayServer["subsystem"] = "Wayland";                break;
+    case SDL_SYSWM_MIR:       displayServer["subsystem"] = "Mir";                    break;
 #endif
 #if SDL_VERSION_ATLEAST(2, 0, 4)
-    case SDL_SYSWM_ANDROID:   info["subsystem"] = "Android";                break;
+    case SDL_SYSWM_ANDROID:   displayServer["subsystem"] = "Android";                break;
 #endif
 #if SDL_VERSION_ATLEAST(2, 0, 5)
     case SDL_SYSWM_VIVANTE:   info["subsystem"] = "Vivante";                break;
 #endif
   }
 
+  std::string glVendor = reinterpret_cast<char const *>(glGetString(GL_VENDOR));
+  gpu["glVendor"].swap(glVendor);
+  std::string glVersion = reinterpret_cast<char const *>(glGetString(GL_VERSION));
+  glVersionInfo["glVersion"].swap(glVersion);
+
+  std::string glRenderer = reinterpret_cast<char const *>(glGetString(GL_RENDERER));
+  if(glRenderer.find("NVIDIA") != std::string::npos) {
+  const GLenum GL_GPU_MEM_INFO_TOTAL_AVAILABLE_MEM_NVX   = 0x9048;
+  const GLenum GL_GPU_MEM_INFO_CURRENT_AVAILABLE_MEM_NVX = 0x9049;
+    GLint nTotalMemoryInKB = 0;
+    glGetIntegerv(GL_GPU_MEM_INFO_TOTAL_AVAILABLE_MEM_NVX,
+                           &nTotalMemoryInKB);
+    std::string TotalMemory = std::to_string(nTotalMemoryInKB) + "KB";
+    glVersionInfo["TotalMemory"]. swap(TotalMemory);
+
+    GLint nCurAvailMemoryInKB = 0;
+    glGetIntegerv( GL_GPU_MEM_INFO_CURRENT_AVAILABLE_MEM_NVX,
+                           &nCurAvailMemoryInKB );
+    std::string currentAvailableMemory = std::to_string(nCurAvailMemoryInKB) + "KB";
+    glVersionInfo["CurrentMemory"]. swap(currentAvailableMemory);
+  } else if (glRenderer.find("AMD") || glRenderer.find("ATI")) {
+
+  } else if(glRenderer.find("Intel")) {
+
+  }
+
+  gpu["glRenderer"].swap(glRenderer);
+
+  SDL_GL_DeleteContext(maincontext);
   SDL_DestroyWindow(window);
   SDL_Quit();
   return true;
 }
-bool read_windowAndInput(map& info) {
-  if(!info.empty()) return true;
-  return false;
-}
-bool read_glInfo(map& info) {
-  if(!info.empty()) return true;
-  return false;
-}
 
 bool SystemInfo::isInitlized() {
     // Read Kernal Info
-    auto& kernelInfo = mInfo["Kernel"];
+    auto& kernelInfo = mInfo[SystemInfoKey::Kernel];
     read_uname(kernelInfo);
     // Read CPU Info
-    auto& cpuInfo = mInfo["CPU"];
+    auto& cpuInfo = mInfo[SystemInfoKey::CPU];
     read_cpuInfo(cpuInfo);
     // Read Mem Info
-    auto& memInfo = mInfo["Mem"];
+    auto& memInfo = mInfo[SystemInfoKey::Mem];
     read_memInfo(memInfo);
     // Read Distro Info
-    auto& distroInfo = mInfo["Distro"];
+    auto& distroInfo = mInfo[SystemInfo::Distro];
     if(!read_osRelease(distroInfo)) {
         read_lsbRelease(distroInfo);
     }
     // Read libc Info
-    auto& glibc = mInfo["GLibC"];
+    auto& glibc = mInfo[SystemInfoKey::GLibC];
     read_glibc(glibc);
     // Read Display Server
-    auto& displayServer = mInfo["DisplayServer"];
-    read_SDL(displayServer);
-    // Read Windowing and input
-    auto& sdl = mInfo["SDL_Version"];
-    read_windowAndInput(sdl);
-    // Read OpenGL
-    auto& glVersion = mInfo["GL_Version"];
-    read_glInfo(glVersion);
+    auto& gpu = mInfo[SystemInfoKey::GPU];
+    auto& sdlVersion = mInfo[SystemInfoKey::SDL_Version];
+    auto& displayServer = mInfo[SystemInfoKey::DisplayServer];
+    auto& glVersion = mInfo[SystemInfoKey::OpenGL];
+    read_SDL(sdlVersion, displayServer, glVersion, gpu);
 
     return true;
 }
 
 std::string SystemInfo::getKernel_Name() {
-    auto& kernel = mInfo["Kernel"];
+    auto& kernel = mInfo[SystemInfoKey::Kernel];
     isInitlized();
 
     return kernel["sysname"];
 }
 
 std::string SystemInfo::getKernel_Arch() {
-    auto& kernel = mInfo["Kernel"];
+    auto& kernel = mInfo[SystemInfoKey::Kernel];
     isInitlized();
 
     return kernel["machine"];
 }
 
 std::string SystemInfo::getKernel_Release() {
-    auto& kernel = mInfo["Kernel"];
+    auto& kernel = mInfo[SystemInfoKey::Kernel];
     isInitlized();
 
     return kernel["release"];
 }
 
 std::string SystemInfo::getMem_Total() {
-  auto& mem = mInfo["Mem"];
+  auto& mem = mInfo[SystemInfoKey::Mem];
   isInitlized();
 
   return mem["MemTotal"];
 }
 
-std::string SystemInfo::getMem_Free() {
-  auto& mem = mInfo["Mem"];
-  isInitlized();
+std::string SystemInfo::getMem_Free(bool forceToReload) {
+  auto& mem = mInfo[SystemInfoKey::Mem];
+  if(forceToReload){
+    read_memInfo(mem);
+  } else {
+    isInitlized();
+  }
 
   return mem["MemFree"];
 }
 
 std::string SystemInfo::getCPU_Name() {
-  auto& cpu = mInfo["CPU"];
+  auto& cpu = mInfo[SystemInfoKey::CPU];
   if(!isInitlized())
       return "Unknown";
   return cpu["modelName"];
 }
 
 std::string SystemInfo::getCPU_Vendor() {
-  auto& cpu = mInfo["CPU"];
+  auto& cpu = mInfo[SystemInfoKey::CPU];
   if(!isInitlized())
       return "Unknown";
   return cpu["vendorId"];
 }
 
 std::string SystemInfo::getCPU_Cache() {
-  auto& cpu = mInfo["CPU"];
+  auto& cpu = mInfo[SystemInfoKey::CPU];
   if(!isInitlized())
       return "Unknown";
   return cpu["cacheSize"];
 }
 
 std::string SystemInfo::getCPU_Cores() {
-  auto& cpu = mInfo["CPU"];
+  auto& cpu = mInfo[SystemInfoKey::CPU];
   if(!isInitlized())
       return "Unknown";
   return cpu["cpuCores"];
@@ -260,25 +289,60 @@ std::string SystemInfo::getCPU_Cores() {
 std::string SystemInfo::getOS_Name() {
     if(!isInitlized())
         return "Unknown";
-    return mInfo["Distro"]["NAME"];
+    return mInfo[SystemInfoKey::Distro]["NAME"];
 }
 
 std::string SystemInfo::getOS_Version() {
     if(!isInitlized())
         return "Unknown";
-    return mInfo["Distro"]["VERSION"];
+    return mInfo[SystemInfoKey::Distro]["VERSION"];
 }
 
 std::string SystemInfo::getLibC_Version() {
-  auto& glib = mInfo["GLibC"];
+  auto& glib = mInfo[SystemInfoKey::GLibC];
   if(!isInitlized())
     return "Unknow";
   return glib["version"];
 }
 
 std::string SystemInfo::getDisplayServer() {
-  auto& displayServer = mInfo["DisplayServer"];
+  auto& displayServer = mInfo[SystemInfoKey::DisplayServer];
   if(!isInitlized())
     return "Unknow";
   return displayServer["subsystem"];
+}
+
+std::string SystemInfo::getSDL_Version() {
+  auto& SDL = mInfo[SystemInfoKey::SDL_Version];
+  if(!isInitlized())
+    return "Unknow";
+  return SDL["version"];
+}
+
+std::string SystemInfo::getGPU_Name() {
+  auto& opengl = mInfo[SystemInfoKey::GPU];
+  if(!isInitlized())
+    return "Unknow";
+  return opengl["glRenderer"];
+}
+
+std::string SystemInfo::getGPU_Vendor() {
+  auto& opengl = mInfo[SystemInfoKey::GPU];
+  if(!isInitlized())
+    return "Unknow";
+  return opengl["glVendor"];
+}
+
+std::string SystemInfo::getGPU_Size() {
+  auto& opengl = mInfo[SystemInfoKey::GPU];
+  if(!isInitlized())
+    return "Unknow";
+  return opengl["size"];
+}
+
+std::string SystemInfo::getOpenGL_Version() {
+  auto& opengl = mInfo[SystemInfoKey::OpenGL];
+  if(!isInitlized())
+    return "Unknow";
+  return opengl["glVersion"];
 }
