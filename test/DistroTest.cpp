@@ -5,11 +5,11 @@
 
 
 TEST_CASE( "Distro Name", "[DistroName]" ) {
-  auto system = getCommand("grep -m1 NAME /etc/os-release | awk -F= '{print $2}'");
+  auto system = getCommand("awk -F= '/NAME/{ print $2; exit }' /etc/os-release");
   REQUIRE(SystemInfo::getOS_Name() == system);
 }
 
 TEST_CASE( "Distro Version", "[DistroVersion]" ) {
-  auto system = getCommand("grep -m1 VERSION /etc/os-release | awk -F= '{print $2}'");
+  auto system = getCommand("wk -F= '/VERSION/{ print $2; exit }' /etc/os-release");
   REQUIRE(SystemInfo::getOS_Version() == "\"5.8\"");
 }
