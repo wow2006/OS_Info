@@ -25,6 +25,8 @@ static std::string getCPU_Cache();
 
 static std::string getCPU_Cores();
 
+static std::string getCPU_hyperThreadingCount();
+
 static std::string getMem_Total();
 
 static std::string getMem_Free(bool forceToReload = false);

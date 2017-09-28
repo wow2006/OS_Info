@@ -32,6 +32,7 @@ bool read_cpuInfo(map& info) {
 
   if(cpuInfo.is_open()) {
       std::string line;
+      int hyperThreads = 0;
       while(std::getline(cpuInfo, line)) {
           if(line.find("model name") != std::string::npos) {
               auto pos = line.find(":");
@@ -49,7 +50,11 @@ bool read_cpuInfo(map& info) {
             auto pos = line.find(":");
             info["cpuCores"] = line.substr(pos+2, line.size());
           }
+          else if(line.find("processor") != std::string::npos) {
+              hyperThreads++;
+          }
       }
+      info["hyperThreadsCount"] = std::to_string(hyperThreads);
       return true;
   }
   return false;
@@ -284,6 +289,13 @@ std::string SystemInfo::getCPU_Cores() {
   if(!isInitlized())
       return "Unknown";
   return cpu["cpuCores"];
+}
+
+std::string SystemInfo::getCPU_hyperThreadingCount() {
+  auto& cpu = mInfo[SystemInfoKey::CPU];
+  if(!isInitlized())
+      return "Unknown";
+  return cpu["hyperThreadsCount"];
 }
 
 std::string SystemInfo::getOS_Name() {

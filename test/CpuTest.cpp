@@ -19,5 +19,11 @@ TEST_CASE("CPU Cache", "[CpuCache]") {
 }
 
 TEST_CASE("CPU Cores", "[CpuCores]") {
-    REQUIRE(SystemInfo::getCPU_Cores() == "4");
+    auto CPU_Cores = getCommand("awk -F: '/cpu cores/ { sub(/^[ ]+/, \"\", $2); print $2; exit }' /proc/cpuinfo");
+    REQUIRE(SystemInfo::getCPU_Cores() == CPU_Cores);
+}
+
+TEST_CASE("CPU Hyperthreading count", "[CpuHyperthreadingCount]") {
+    auto hThreadCount = getCommand("grep -c \"processor\" /proc/cpuinfo");
+    REQUIRE(SystemInfo::getCPU_hyperThreadingCount() == hThreadCount);
 }
