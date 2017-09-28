@@ -197,7 +197,7 @@ bool read_SDL(map& sdlVersion, map& displayServer,
 }
 
 bool SystemInfo::isInitlized() {
-    // Read Kernal Info
+    // Read Kernel Info
     auto& kernelInfo = mInfo[SystemInfoKey::Kernel];
     read_uname(kernelInfo);
     // Read CPU Info
