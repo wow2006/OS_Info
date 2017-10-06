@@ -2,7 +2,8 @@ find_package(SDL2 REQUIRED)
 
 if(UNIX)
   set(src DebugInfoLinux.cpp linux/kernelInfo.cpp
-      linux/hardwareInfo.cpp linux/sdlInfo.cpp)
+      linux/hardwareInfo.cpp linux/sdlInfo.cpp
+      linux/glibcInfo.cpp)
 elseif(WIN32)
   set(src "")
 endif()
