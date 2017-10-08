@@ -44,11 +44,6 @@ void readSystemInfo(map& kernelInfo, map& cpuInfo, map& memInfo) {
     DWORD processorL1CacheCount = 0;
     DWORD processorL2CacheCount = 0;
     DWORD processorL3CacheCount = 0;
-
-    DWORD processorL1Cache = 0;
-    DWORD processorL2Cache = 0;
-    DWORD processorL3Cache = 0;
-
     DWORD processorPackageCount = 0;
     PCACHE_DESCRIPTOR Cache;
 
@@ -108,17 +103,14 @@ void readSystemInfo(map& kernelInfo, map& cpuInfo, map& memInfo) {
         if (Cache->Level == 1)
         {
           processorL1CacheCount++;
-          processorL1Cache = Cache->Size;
         }
         else if (Cache->Level == 2)
         {
           processorL2CacheCount++;
-          processorL2Cache = Cache->Size;
         }
         else if (Cache->Level == 3)
         {
           processorL3CacheCount++;
-          processorL3Cache = Cache->Size;
         }
         break;
 
@@ -134,9 +126,9 @@ void readSystemInfo(map& kernelInfo, map& cpuInfo, map& memInfo) {
       ptr++;
     }
 
-    cpuInfo["CpuCache"] = std::to_string(int(processorL1Cache/1024)) + "kB";
-    cpuInfo["CpuCache2"] = std::to_string(int(processorL2Cache / 1024)) + "kB";
-    cpuInfo["CpuCache3"] = std::to_string(int(processorL3Cache / 1024)) + "kB";
+    cpuInfo["CpuCache"] = std::to_string(processorL1CacheCount);
+    cpuInfo["CpuCache2"] = std::to_string(processorL2CacheCount);
+    cpuInfo["CpuCache3"] = std::to_string(processorL3CacheCount);
     cpuInfo["CpuCores"] = std::to_string(processorCoreCount);
     cpuInfo["CpuHyperthreadingCount"] = std::to_string(logicalProcessorCount);
   }
@@ -303,15 +295,7 @@ std::string SystemInfo::getCPU_Vendor() {
   return cpuInfo["CpuVendorId"];
 }
 
-std::string SystemInfo::getCPU_Cache() {
-  if (!isInitlized())
-    return "Unknown";
-
-  auto& cpuInfo = mInfo[SystemInfoKey::CPU];
-  return cpuInfo["CpuCache"];
-}
-
-std::string SystemInfo::getCPU_Cores() {
+std::string SystemInfo::getCPU_Vendor() {
   if (!isInitlized())
     return "Unknown";
 
