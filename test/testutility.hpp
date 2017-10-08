@@ -8,8 +8,13 @@
 #include <iostream>
 
 static std::string getCommand(std::string&& _command) {
-  std::stringstream buffer;
-  FILE* in = popen(_command.c_str(), "r");
+	std::stringstream buffer;
+#if defined _MSC_VER
+	FILE* in = _popen(_command.c_str(), "r");
+#else
+	FILE* in = popen(_command.c_str(), "r");
+#endif
+  
   if (in) {
     std::array<char, 512> buff;
     while (fgets(buff.data(), buff.size(), in) != nullptr) {

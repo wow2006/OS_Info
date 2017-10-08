@@ -2,6 +2,7 @@
 #define DEBUG_INFO_HPP
 #include <string>
 #include <unordered_map>
+#include <array>
 
 class SystemInfo {
   public:

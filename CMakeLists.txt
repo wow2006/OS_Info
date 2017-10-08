@@ -14,7 +14,7 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     set(MSVC_COMPILER ON)
 endif()
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
+#list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
 
 enable_testing()
 add_subdirectory(src)
