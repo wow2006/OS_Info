@@ -5,7 +5,7 @@ if(UNIX)
       linux/hardwareInfo.cpp linux/sdlInfo.cpp
       linux/glibcInfo.cpp)
 elseif(WIN32)
-  set(src DebugInfoWindows.cpp)
+  set(src DebugInfoWindows.cpp windows/systemInfo.cpp)
 endif()
 
 add_library(SystemInfo STATIC ${src})
