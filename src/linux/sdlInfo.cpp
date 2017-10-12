@@ -63,7 +63,7 @@ bool SdlInfo::read_SDL(map& sdlVersion, map& displayServer, map& glVersionInfo,
 #endif
 #if SDL_VERSION_ATLEAST(2, 0, 5)
     case SDL_SYSWM_VIVANTE:
-      info["subsystem"] = "Vivante";
+      displayServer["subsystem"] = "Vivante";
       break;
 #endif
   }

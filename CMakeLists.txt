@@ -14,7 +14,13 @@ elseif(CMAKE_CXX_COMPILER_ID MATCHES "MSVC")
     set(MSVC_COMPILER ON)
 endif()
 
-#list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/modules)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+option(USE_SDL "Use SDL2 to get OpenGL and SDL info" ON)
+if(USE_SDL)
+	message("Download SDL2")
+	include(${CMAKE_SOURCE_DIR}/cmake/BuildSDL.cmake)
+endif(USE_SDL)
 
 enable_testing()
 add_subdirectory(src)
