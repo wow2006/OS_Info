@@ -11,7 +11,11 @@ else()
 	set(TEMP_DIR "${CMAKE_SOURCE_DIR}/3rdparty/SDL2-2.0.6")
 	set(TARGET_DIR "${CMAKE_SOURCE_DIR}/3rdparty/SDL2")
 	if(EXISTS ${TAR_FILE})
+	message("${CMAKE_COMMAND} -E tar -x ${TAR_FILE}")
 		add_custom_target(SDL2)
+		add_custom_command(TARGET SDL2 POST_BUILD
+		COMMAND "${CMAKE_COMMAND}" -E tar -x "${TAR_FILE}"
+		WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/3rdparty/")
 	else()
 		include(ExternalProject)
 		ExternalProject_Add(
@@ -36,6 +40,7 @@ else()
 
 	add_custom_command(TARGET SDL2 POST_BUILD
 	COMMAND "${CMAKE_COMMAND}" -E remove_directory "${TEMP_DIR}")
+
 	add_custom_command(TARGET SDL2 POST_BUILD
 	COMMAND "${CMAKE_COMMAND}" -E copy
 	"${TARGET_DIR}/lib/x64/SDL2.dll" "${CMAKE_BINARY_DIR}/SDL2.dll")
