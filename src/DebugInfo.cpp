@@ -13,19 +13,19 @@
 #include "linux/glibcInfo.hpp"
 #endif
 
-std::array<SystemInfo::stringMap, SystemInfo::COUNT> SystemInfo::mInfo;
+std::array<DebugInfo::stringMap, DebugInfo::COUNT> DebugInfo::mInfo;
 
 using map = std::unordered_map<std::string, std::string>;
 
 #ifdef _MSC_VER
-bool SystemInfo::isInitlized() {
-  auto& kernel = mInfo[SystemInfo::Kernel];
-  auto& cpu = mInfo[SystemInfo::CPU];
-  auto& distro = mInfo[SystemInfo::Distro];
-  auto& mem = mInfo[SystemInfo::Mem];
+bool DebugInfo::isInitlized() {
+  auto& kernel = mInfo[DebugInfo::Kernel];
+  auto& cpu = mInfo[DebugInfo::CPU];
+  auto& distro = mInfo[DebugInfo::Distro];
+  auto& mem = mInfo[DebugInfo::Mem];
   systemInfo::readSystemInfo(kernel, cpu, mem);
 
-  auto& clib = mInfo[SystemInfo::GLibC];
+  auto& clib = mInfo[DebugInfo::GLibC];
   clib["LibcVersion"] = std::to_string(_MSC_VER);
 
   distro["DistroName"] = "Windows";
@@ -33,66 +33,66 @@ bool SystemInfo::isInitlized() {
   return true;
 }
 #else
-bool SystemInfo::isInitlized() {
+bool DebugInfo::isInitlized() {
   // Read Kernel Info
-  auto& kernelInfo = mInfo[SystemInfoKey::Kernel];
+  auto& kernelInfo = mInfo[DebugInfo::Kernel];
   KernelInfo::read_uname(kernelInfo);
   // Read CPU Info
-  auto& cpuInfo = mInfo[SystemInfoKey::CPU];
+  auto& cpuInfo = mInfo[DebugInfo::CPU];
   HardwareInfo::read_cpuInfo(cpuInfo);
   // Read Mem Info
-  auto& memInfo = mInfo[SystemInfoKey::Mem];
+  auto& memInfo = mInfo[DebugInfo::Mem];
   HardwareInfo::read_memInfo(memInfo);
   // Read Distro Info
-  auto& distroInfo = mInfo[SystemInfo::Distro];
+  auto& distroInfo = mInfo[DebugInfo::Distro];
   if (!DistroInfo::read_distroInfo("/etc/os-release", distroInfo)) {
     DistroInfo::read_distroInfo("/etc/lsb-release", distroInfo);
   }
   // Read libc Info
-  auto& glibc = mInfo[SystemInfoKey::GLibC];
+  auto& glibc = mInfo[DebugInfo::GLibC];
   GlibcInfo::read_glibc(glibc);
   // Read Display Server
-  auto& gpu = mInfo[SystemInfoKey::GPU];
-  auto& sdlVersion = mInfo[SystemInfoKey::SDL_Version];
-  auto& displayServer = mInfo[SystemInfoKey::DisplayServer];
-  auto& glVersion = mInfo[SystemInfoKey::OpenGL];
+  auto& gpu = mInfo[DebugInfo::GPU];
+  auto& sdlVersion = mInfo[DebugInfo::SDL_Version];
+  auto& displayServer = mInfo[DebugInfo::DisplayServer];
+  auto& glVersion = mInfo[DebugInfo::OpenGL];
   SdlInfo::read_SDL(sdlVersion, displayServer, glVersion, gpu);
 
   return true;
 }
 #endif
 
-std::string SystemInfo::getKernel_Name() {
-  auto& kernel = mInfo[SystemInfoKey::Kernel];
+std::string DebugInfo::getKernel_Name() {
+  auto& kernel = mInfo[DebugInfo::Kernel];
   isInitlized();
 
   return kernel["sysname"];
 }
 
-std::string SystemInfo::getKernel_Arch() {
-  auto& kernel = mInfo[SystemInfoKey::Kernel];
+std::string DebugInfo::getKernel_Arch() {
+  auto& kernel = mInfo[DebugInfo::Kernel];
   isInitlized();
 
   return kernel["machine"];
 }
 
-std::string SystemInfo::getKernel_Release() {
-  auto& kernel = mInfo[SystemInfoKey::Kernel];
+std::string DebugInfo::getKernel_Release() {
+  auto& kernel = mInfo[DebugInfo::Kernel];
   isInitlized();
 
   return kernel["release"];
 }
 
-std::string SystemInfo::getMem_Total() {
-  auto& mem = mInfo[SystemInfoKey::Mem];
+std::string DebugInfo::getMem_Total() {
+  auto& mem = mInfo[DebugInfo::Mem];
   isInitlized();
 
   return mem["MemTotal"];
 }
 
 
-std::string SystemInfo::getMem_Free(bool forceToReload) {
-  auto& mem = mInfo[SystemInfoKey::Mem];
+std::string DebugInfo::getMem_Free(bool forceToReload) {
+  auto& mem = mInfo[DebugInfo::Mem];
 #ifdef _MSC_VER
 #else
   if (forceToReload) {
@@ -104,40 +104,40 @@ std::string SystemInfo::getMem_Free(bool forceToReload) {
   return mem["MemFree"];
 }
 
-std::string SystemInfo::getCPU_Name() {
-  auto& cpu = mInfo[SystemInfoKey::CPU];
+std::string DebugInfo::getCPU_Name() {
+  auto& cpu = mInfo[DebugInfo::CPU];
   if (!isInitlized()) return "Unknown";
   return cpu["modelName"];
 }
 
-std::string SystemInfo::getCPU_Vendor() {
-  auto& cpu = mInfo[SystemInfoKey::CPU];
+std::string DebugInfo::getCPU_Vendor() {
+  auto& cpu = mInfo[DebugInfo::CPU];
   if (!isInitlized()) return "Unknown";
   return cpu["vendorId"];
 }
 
-std::string SystemInfo::getCPU_Cache() {
-  auto& cpu = mInfo[SystemInfoKey::CPU];
+std::string DebugInfo::getCPU_Cache() {
+  auto& cpu = mInfo[DebugInfo::CPU];
   if (!isInitlized()) return "Unknown";
   return cpu["cacheSize"];
 }
 
-std::string SystemInfo::getCPU_Cores() {
-  auto& cpu = mInfo[SystemInfoKey::CPU];
+std::string DebugInfo::getCPU_Cores() {
+  auto& cpu = mInfo[DebugInfo::CPU];
   if (!isInitlized()) return "Unknown";
   return cpu["cpuCores"];
 }
 
-std::string SystemInfo::getCPU_hyperThreadingCount() {
-  auto& cpu = mInfo[SystemInfoKey::CPU];
+std::string DebugInfo::getCPU_hyperThreadingCount() {
+  auto& cpu = mInfo[DebugInfo::CPU];
   if (!isInitlized()) return "Unknown";
   return cpu["hyperThreadsCount"];
 }
 
-std::string SystemInfo::getOS_Name() {
+std::string DebugInfo::getOS_Name() {
   if (!isInitlized()) return "Unknown";
 
-  auto& kernel = mInfo[SystemInfoKey::Distro];
+  auto& kernel = mInfo[DebugInfo::Distro];
 
   map::iterator itr;
   if ((itr = kernel.find("NAME")) != kernel.end()) {
@@ -149,10 +149,10 @@ std::string SystemInfo::getOS_Name() {
   return "Unknown";
 }
 
-std::string SystemInfo::getOS_Version() {
+std::string DebugInfo::getOS_Version() {
   if (!isInitlized()) return "Unknown";
 
-  auto& version = mInfo[SystemInfoKey::Distro];
+  auto& version = mInfo[DebugInfo::Distro];
 
   map::iterator itr;
   if ((itr = version.find("VERSION_ID")) != version.end()) {
@@ -163,44 +163,44 @@ std::string SystemInfo::getOS_Version() {
   return "Unknown";
 }
 
-std::string SystemInfo::getLibC_Version() {
-  auto& glib = mInfo[SystemInfoKey::GLibC];
+std::string DebugInfo::getLibC_Version() {
+  auto& glib = mInfo[DebugInfo::GLibC];
   if (!isInitlized()) return "Unknow";
   return glib["version"];
 }
 
-std::string SystemInfo::getDisplayServer() {
-  auto& displayServer = mInfo[SystemInfoKey::DisplayServer];
+std::string DebugInfo::getDisplayServer() {
+  auto& displayServer = mInfo[DebugInfo::DisplayServer];
   if (!isInitlized()) return "Unknow";
   return displayServer["subsystem"];
 }
 
-std::string SystemInfo::getSDL_Version() {
-  auto& SDL = mInfo[SystemInfoKey::SDL_Version];
+std::string DebugInfo::getSDL_Version() {
+  auto& SDL = mInfo[DebugInfo::SDL_Version];
   if (!isInitlized()) return "Unknow";
   return SDL["version"];
 }
 
-std::string SystemInfo::getGPU_Name() {
-  auto& opengl = mInfo[SystemInfoKey::GPU];
+std::string DebugInfo::getGPU_Name() {
+  auto& opengl = mInfo[DebugInfo::GPU];
   if (!isInitlized()) return "Unknow";
   return opengl["glRenderer"];
 }
 
-std::string SystemInfo::getGPU_Vendor() {
-  auto& opengl = mInfo[SystemInfoKey::GPU];
+std::string DebugInfo::getGPU_Vendor() {
+  auto& opengl = mInfo[DebugInfo::GPU];
   if (!isInitlized()) return "Unknow";
   return opengl["glVendor"];
 }
 
-std::string SystemInfo::getGPU_Size() {
-  auto& opengl = mInfo[SystemInfoKey::GPU];
+std::string DebugInfo::getGPU_Size() {
+  auto& opengl = mInfo[DebugInfo::GPU];
   if (!isInitlized()) return "Unknow";
   return opengl["size"];
 }
 
-std::string SystemInfo::getOpenGL_Version() {
-  auto& opengl = mInfo[SystemInfoKey::OpenGL];
+std::string DebugInfo::getOpenGL_Version() {
+  auto& opengl = mInfo[DebugInfo::OpenGL];
   if (!isInitlized()) return "Unknow";
   return opengl["glVersion"];
 }

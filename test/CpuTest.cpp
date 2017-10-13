@@ -23,25 +23,25 @@ constexpr auto CpuHyperthreadingCountCommand = "grep -c \"processor\" /proc/cpui
 
 TEST_CASE("CPU Model", "[CpuModel]") {
   auto CPU_Name = "Intel(R) Core(TM) i7 CPU         920  @ 2.67GHz";// getCommand(CpuModelCommand);
-  REQUIRE(SystemInfo::getCPU_Name() == CPU_Name);
+  REQUIRE(DebugInfo::getCPU_Name() == CPU_Name);
 }
 
 TEST_CASE("CPU Vendor", "[CpuVendorId]") {
   auto CPU_Vendor = "GenuineIntel";// getCommand(CpuVendorIdCommand);
-  REQUIRE(SystemInfo::getCPU_Vendor() == CPU_Vendor);
+  REQUIRE(DebugInfo::getCPU_Vendor() == CPU_Vendor);
 }
 
 TEST_CASE("CPU Cache", "[CpuCache]") {
   auto CPU_Cache = "32kB";// getCommand(CpuCacheCommand);
-  REQUIRE(SystemInfo::getCPU_Cache() == CPU_Cache);
+  REQUIRE(DebugInfo::getCPU_Cache() == CPU_Cache);
 }
 
 TEST_CASE("CPU Cores", "[CpuCores]") {
   auto CPU_Cores = "4";// getCommand(CpuCoresCommand);
-  REQUIRE(SystemInfo::getCPU_Cores() == CPU_Cores);
+  REQUIRE(DebugInfo::getCPU_Cores() == CPU_Cores);
 }
 
 TEST_CASE("CPU Hyperthreading count", "[CpuHyperthreadingCount]") {
   auto hThreadCount = "8";// getCommand(CpuHyperthreadingCountCommand);
-  REQUIRE(SystemInfo::getCPU_hyperThreadingCount() == hThreadCount);
+  REQUIRE(DebugInfo::getCPU_hyperThreadingCount() == hThreadCount);
 }

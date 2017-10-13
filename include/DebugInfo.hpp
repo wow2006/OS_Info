@@ -4,7 +4,7 @@
 #include <unordered_map>
 #include <array>
 
-class SystemInfo {
+class DebugInfo {
   public:
   enum SystemInfoKey {
     Kernel = 0,

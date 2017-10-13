@@ -20,14 +20,14 @@ constexpr auto MemFreeCommand = "grep MemFree /proc/meminfo | awk -F: '{x=$2}"
 
 TEST_CASE("Memory Total", "[MemTotal]") {
 	auto systemCommand = "16381MB";//getCommand(MemTotalCommand);
-  REQUIRE(SystemInfo::getMem_Total() == systemCommand);
+  REQUIRE(DebugInfo::getMem_Total() == systemCommand);
 }
 
 
 TEST_CASE("Swap Total", "[SwapTotal]") {
 	auto systemCommand = "32761MB"; //getCommand(SwapTotalCommand);
-  SystemInfo::isInitlized();
-  auto swap = SystemInfo::mInfo[SystemInfo::Mem]["SwapTotal"];
+  DebugInfo::isInitlized();
+  auto swap = DebugInfo::mInfo[DebugInfo::Mem]["SwapTotal"];
   REQUIRE(swap == systemCommand);
 }
 

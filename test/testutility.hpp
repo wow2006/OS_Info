@@ -17,7 +17,7 @@ static std::string getCommand(std::string&& _command) {
   
   if (in) {
     std::array<char, 512> buff;
-    while (fgets(buff.data(), buff.size(), in) != nullptr) {
+    while (fgets(buff.data(), static_cast<int>(buff.size()), in) != nullptr) {
       // remove ***\n*** from buffer
       auto pos = strlen(buff.data());
       if (buff[pos - 1] == '\n') buff[pos - 1] = 0;

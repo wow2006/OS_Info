@@ -13,10 +13,10 @@ constexpr auto DistroVersion = "awk -F= '/VERSION_ID/{ print $2; exit }' /etc/os
 
 TEST_CASE("Distro Name", "[DistroName]") {
 	auto system = "Windows";// getCommand(DistroNameStr);
-  REQUIRE(SystemInfo::getOS_Name() == system);
+  REQUIRE(DebugInfo::getOS_Name() == system);
 }
 
 TEST_CASE("Distro Version", "[DistroVersion]") {
   auto system = "Win7SP10";
-  REQUIRE(SystemInfo::getOS_Version() == system);
+  REQUIRE(DebugInfo::getOS_Version() == system);
 }
