@@ -2,16 +2,37 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+
+#ifdef _MSC_VER
+#include "windows\systemInfo.hpp"
+#else
 #include "linux/kernelInfo.hpp"
 #include "linux/hardwareInfo.hpp"
 #include "linux/distroInfo.cpp"
 #include "linux/sdlInfo.hpp"
 #include "linux/glibcInfo.hpp"
+#endif
 
 std::array<SystemInfo::stringMap, SystemInfo::COUNT> SystemInfo::mInfo;
 
 using map = std::unordered_map<std::string, std::string>;
 
+#ifdef _MSC_VER
+bool SystemInfo::isInitlized() {
+  auto& kernel = mInfo[SystemInfo::Kernel];
+  auto& cpu = mInfo[SystemInfo::CPU];
+  auto& distro = mInfo[SystemInfo::Distro];
+  auto& mem = mInfo[SystemInfo::Mem];
+  systemInfo::readSystemInfo(kernel, cpu, mem);
+
+  auto& clib = mInfo[SystemInfo::GLibC];
+  clib["LibcVersion"] = std::to_string(_MSC_VER);
+
+  distro["DistroName"] = "Windows";
+  distro["DistroVersion"] = systemInfo::getWindowsName();
+  return true;
+}
+#else
 bool SystemInfo::isInitlized() {
   // Read Kernel Info
   auto& kernelInfo = mInfo[SystemInfoKey::Kernel];
@@ -39,6 +60,7 @@ bool SystemInfo::isInitlized() {
 
   return true;
 }
+#endif
 
 std::string SystemInfo::getKernel_Name() {
   auto& kernel = mInfo[SystemInfoKey::Kernel];
@@ -68,14 +90,17 @@ std::string SystemInfo::getMem_Total() {
   return mem["MemTotal"];
 }
 
+
 std::string SystemInfo::getMem_Free(bool forceToReload) {
   auto& mem = mInfo[SystemInfoKey::Mem];
+#ifdef _MSC_VER
+#else
   if (forceToReload) {
     HardwareInfo::read_memInfo(mem);
   } else {
     isInitlized();
   }
-
+#endif
   return mem["MemFree"];
 }
 

@@ -31,7 +31,7 @@ DWORD systemInfo::CountSetBits(ULONG_PTR bitMask)
 void systemInfo::readSystemInfo(map& kernelInfo, map& cpuInfo, map& memInfo) {
   {// read https://msdn.microsoft.com/en-us/library/windows/desktop/ms683194(v=vs.85).aspx
    // Read CPU Count cores and Cache
-    DWORD byteOffset = 0;
+    DWORD byteOffset   = 0;
     DWORD returnLength = 0;
     BOOL done = FALSE;
     PSYSTEM_LOGICAL_PROCESSOR_INFORMATION buffer = NULL;
@@ -51,8 +51,7 @@ void systemInfo::readSystemInfo(map& kernelInfo, map& cpuInfo, map& memInfo) {
     DWORD processorPackageCount = 0;
     PCACHE_DESCRIPTOR Cache;
 
-    LPFN_GLPI glpi;
-    glpi = (LPFN_GLPI)GetProcAddress(
+    LPFN_GLPI glpi = (LPFN_GLPI)GetProcAddress(
       GetModuleHandle(TEXT("kernel32")),
       "GetLogicalProcessorInformation");
 
