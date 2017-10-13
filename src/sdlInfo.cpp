@@ -1,4 +1,4 @@
-#include "linux/sdlInfo.hpp"
+#include "sdlInfo.hpp"
 #include <iostream>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>

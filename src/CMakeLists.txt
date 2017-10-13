@@ -11,7 +11,7 @@ set(link_list "")
 if(USE_SDL)
 	list(APPEND link_list    ${SDL2_LIBRARY})
 	list(APPEND include_list ${SDL2_INCLUDE_DIR})
-	list(APPEND src linux/sdlInfo.cpp)
+	list(APPEND src sdlInfo.cpp)
 endif()
 
 add_library(SystemInfo STATIC DebugInfo.cpp ${src})
