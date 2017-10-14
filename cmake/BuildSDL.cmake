@@ -7,11 +7,19 @@ if(UNIX)
 		message("Install SDL from package manager")
 	endif()
 else()
-	set(TAR_FILE "${CMAKE_SOURCE_DIR}/3rdparty/SDL2-devel-2.0.6-VC.zip")
+
+if(WIN32)
+  set(URL https://www.libsdl.org/release/SDL2-devel-2.0.6-VC.zip)
+  set(TAR_FILE "${CMAKE_SOURCE_DIR}/3rdparty/SDL2-devel-2.0.6-VC.zip")
+else()
+  set(URL https://www.libsdl.org/release/SDL2-devel-2.0.6-mingw.tar.gz)
+  set(TAR_FILE "${CMAKE_SOURCE_DIR}/3rdparty/SDL2-devel-2.0.6-mingw.tar.gz")
+endif()
+
 	set(TEMP_DIR "${CMAKE_SOURCE_DIR}/3rdparty/SDL2-2.0.6")
 	set(TARGET_DIR "${CMAKE_SOURCE_DIR}/3rdparty/SDL2")
-	if(EXISTS ${TAR_FILE})
-	message("${CMAKE_COMMAND} -E tar -x ${TAR_FILE}")
+
+  if(EXISTS ${TAR_FILE})
 		add_custom_target(SDL2)
 		add_custom_command(TARGET SDL2 POST_BUILD
 		COMMAND "${CMAKE_COMMAND}" -E tar -x "${TAR_FILE}"
@@ -20,7 +28,7 @@ else()
 		include(ExternalProject)
 		ExternalProject_Add(
 		SDL2
-		URL https://www.libsdl.org/release/SDL2-devel-2.0.6-VC.zip
+		URL ${URL}
 		DOWNLOAD_DIR    "${CMAKE_SOURCE_DIR}/3rdparty/"
 		SOURCE_DIR      ${TEMP_DIR}
 		CONFIGURE_COMMAND ""
@@ -49,24 +57,3 @@ else()
 	set(SDL2_LIBRARY "${TARGET_DIR}/lib/x64/SDL2.lib"
 					 "${TARGET_DIR}/lib/x64/SDL2main.lib")
 endif()
-
-#if(NOT SDL2_FOUND)
-#	message("Building SDL from source")
-#	option(SDL_ATOMIC     "" OFF)
-#	option(SDL_AUDIO      "" OFF)
-#	option(SDL_DLOPEN     "" OFF)
-#	option(SDL_EVENTS     "" OFF)
-#	option(SDL_FILE       "" OFF)
-#	option(SDL_FILESYSTEM "" OFF)
-#	option(SDL_HAPTIC     "" OFF)
-#	option(SDL_JOYSTICK   "" OFF)
-#	#option(SDL_LOADSO    "" OFF)
-#	option(SDL_POWER      "" OFF)
-#	option(SDL_SHARED     "" OFF)
-#	option(RENDER_D3D     "" OFF)
-#	option(VIDEO_DUMMY    "" OFF)
-#	option(VIDEO_OPENGLES "" OFF)
-#	option(VIDEO_VULKAN   "" OFF)
-#	option(DIRECTX        "" OFF)
-#	add_subdirectory("${CMAKE_SOURCE_DIR}/3rdparty/SDL")
-#endif()
