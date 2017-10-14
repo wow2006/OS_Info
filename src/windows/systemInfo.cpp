@@ -135,11 +135,11 @@ void systemInfo::readSystemInfo(map& kernelInfo, map& cpuInfo, map& memInfo) {
       ptr++;
     }
 
-    cpuInfo["CpuCache"] = std::to_string(int(processorL1Cache / 1024)) + "kB";
-    cpuInfo["CpuCache2"] = std::to_string(int(processorL2Cache / 1024)) + "kB";
-    cpuInfo["CpuCache3"] = std::to_string(int(processorL3Cache / 1024)) + "kB";
-    cpuInfo["CpuCores"] = std::to_string(processorCoreCount);
-    cpuInfo["CpuHyperthreadingCount"] = std::to_string(logicalProcessorCount);
+    cpuInfo["cacheSize"] = std::to_string(int(processorL1Cache / 1024)) + "kB";
+    cpuInfo["cacheSize2"] = std::to_string(int(processorL2Cache / 1024)) + "kB";
+    cpuInfo["cacheSize3"] = std::to_string(int(processorL3Cache / 1024)) + "kB";
+    cpuInfo["cpuCores"] = std::to_string(processorCoreCount);
+    cpuInfo["hyperThreadsCount"] = std::to_string(logicalProcessorCount);
   }
 
   SYSTEM_INFO info;

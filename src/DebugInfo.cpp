@@ -44,7 +44,7 @@ bool DebugInfo::isInitlized() {
 #ifdef _WINDOWS
   systemInfo::readSystemInfo(kernelInfo, cpuInfo, memInfo);
 
-  distroInfo["NAME"]    = "Windows";
+  distroInfo["NAME"]       = "Windows";
   distroInfo["VERSION_ID"] = systemInfo::getWindowsName();
 #else
   // Read Kernel Info
