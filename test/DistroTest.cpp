@@ -4,19 +4,19 @@
 #include "testutility.hpp"
 
 #if defined _MSC_VER
-constexpr auto DistroNameStr = "";
-constexpr auto DistroVersion = "";
+constexpr auto DistroNameStr = "echo Windows";
+constexpr auto DistroVersion = "echo Windows8";
 #else
 constexpr auto DistroNameStr = "awk -F= '/NAME/{ print $2; exit }' /etc/os-release";
 constexpr auto DistroVersion = "awk -F= '/VERSION_ID/{ print $2; exit }' /etc/os-release";
 #endif
 
 TEST_CASE("Distro Name", "[DistroName]") {
-	auto system = "Windows";// getCommand(DistroNameStr);
+	auto system = getCommand(DistroNameStr);
   REQUIRE(DebugInfo::getOS_Name() == system);
 }
 
 TEST_CASE("Distro Version", "[DistroVersion]") {
-  auto system = "Win7SP10";
+  auto system = getCommand(DistroVersion);
   REQUIRE(DebugInfo::getOS_Version() == system);
 }

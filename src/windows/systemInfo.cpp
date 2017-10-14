@@ -2,11 +2,11 @@
 #include <iostream>
 #include <array>
 #include <vector>
-#include <SDL2\SDL.h>
+//#include <SDL2\SDL.h>
 
 #ifdef _MSC_VER
-#include <VersionHelpers.h>
-#include <intrin.h>
+//#include <VersionHelpers.h>
+//#include <intrin.h>
 
 typedef BOOL(WINAPI *LPFN_GLPI)(
   PSYSTEM_LOGICAL_PROCESSOR_INFORMATION,
@@ -158,50 +158,6 @@ void systemInfo::readSystemInfo(map& kernelInfo, map& cpuInfo, map& memInfo) {
     break;
   }
 
-  { // read https://msdn.microsoft.com/en-us/library/hskdteyh.aspx
-    std::vector<std::array<int, 4>> data_;
-    std::vector<std::array<int, 4>> extdata_;
-
-    std::array<int, 4> cpui;
-    __cpuid(cpui.data(), 0);
-    auto nIds_ = cpui[0];
-
-    for (int i = 0; i <= nIds_; ++i) {
-      __cpuidex(cpui.data(), i, 0);
-      data_.push_back(cpui);
-    }
-    // Capture vendor string  
-    char vendor[0x20];
-    memset(vendor, 0, sizeof(vendor));
-    *reinterpret_cast<int*>(vendor) = data_[0][1];
-    *reinterpret_cast<int*>(vendor + 4) = data_[0][3];
-    *reinterpret_cast<int*>(vendor + 8) = data_[0][2];
-    cpuInfo["CpuVendorId"] = vendor;
-
-    // Calling __cpuid with 0x80000000 as the function_id argument  
-    // gets the number of the highest valid extended ID.  
-    __cpuid(cpui.data(), 0x80000000);
-    auto nExIds_ = cpui[0];
-
-    char brand[0x40];
-    memset(brand, 0, sizeof(brand));
-
-    for (int i = 0x80000000; i <= nExIds_; ++i)
-    {
-      __cpuidex(cpui.data(), i, 0);
-      extdata_.push_back(cpui);
-    }
-
-    // Interpret CPU brand string if reported  
-    if (nExIds_ >= 0x80000004)
-    {
-      memcpy(brand, extdata_[2].data(), sizeof(cpui));
-      memcpy(brand + 16, extdata_[3].data(), sizeof(cpui));
-      memcpy(brand + 32, extdata_[4].data(), sizeof(cpui));
-      cpuInfo["CpuModel"] = brand;
-    }
-  }
-
   {//
     MEMORYSTATUSEX statex;
     statex.dwLength = sizeof(statex);
@@ -216,27 +172,34 @@ void systemInfo::readSystemInfo(map& kernelInfo, map& cpuInfo, map& memInfo) {
 }
 
 std::string systemInfo::getWindowsName() {
-  if (IsWindows10OrGreater())
-  {
-    return "Win10";
-  }
-  if (IsWindows8Point1OrGreater())
-  {
-    return "Win8.1";
-  }
-  if (IsWindows8OrGreater())
-  {
-    return "Win8";
-  }
-  if (IsWindows7SP1OrGreater())
-  {
-    return "Win7SP10";
-  }
-  if (IsWindows7OrGreater())
-  {
-    return "Win7SP10";
-  }
+  OSVERSIONINFO osvi;
+  BOOL bIsWindowsXPorLater;
 
+  ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
+  osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+
+  GetVersionEx(&osvi);
+
+  std::string windowsVersion;
+  switch (osvi.dwMajorVersion)
+  {
+  case 10:
+    return "Windows10";
+  case 6:
+    switch (osvi.dwMinorVersion)
+    {
+    case 3:
+      return "Windows8.1";
+    case 2:
+      return "Windows8";
+    case 1:
+      return "Windows7";
+    case 0:
+      return "Windows Vista";
+    }
+  case 5:
+    return "Windows XP";
+  }
   return "Unknown";
 }
 #endif

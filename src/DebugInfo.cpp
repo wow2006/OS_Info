@@ -33,13 +33,19 @@ bool DebugInfo::isInitlized() {
   auto& glibcInfo  = mInfo[DebugInfo::GLibC];
   SdlInfo::read_SDL(sdlInfo, disInfo, glInfo, GPUInfo, cpuInfo, memInfo);
   SdlInfo::destory_SDL();
+
 #ifdef _MSC_VER
+  glibcInfo["version"] = std::to_string(_MSC_VER);
+#else
+  // Read libc Info
+  GlibcInfo::read_glibc(glibcInfo);
+#endif
+
+#ifdef _WINDOWS
   systemInfo::readSystemInfo(kernelInfo, cpuInfo, memInfo);
 
-  glibcInfo["version"] = std::to_string(_MSC_VER);
-
-  //distroInfo["DistroName"]    = "Windows";
-  //distroInfo["DistroVersion"] = systemInfo::getWindowsName();
+  distroInfo["NAME"]    = "Windows";
+  distroInfo["VERSION_ID"] = systemInfo::getWindowsName();
 #else
   // Read Kernel Info
   KernelInfo::read_uname(kernelInfo);
@@ -51,8 +57,6 @@ bool DebugInfo::isInitlized() {
   if (!DistroInfo::read_distroInfo("/etc/os-release", distroInfo)) {
     DistroInfo::read_distroInfo("/etc/lsb-release", distroInfo);
   }
-  // Read libc Info
-  GlibcInfo::read_glibc(glibcInfo);
 #endif
   return true;
 }
