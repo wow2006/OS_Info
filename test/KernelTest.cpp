@@ -3,6 +3,16 @@
 #include "DebugInfo.hpp"
 #include "testutility.hpp"
 
+#ifdef _WIN32
+constexpr auto KernelNameCommand    = "echo";
+constexpr auto CPU_ArchCommand      = "echo";
+constexpr auto KernelReleaseCommand = "echo";
+#else
+constexpr auto KernelNameCommand = "uname";
+constexpr auto CPU_ArchCommand = "uname -p";
+constexpr auto KernelReleaseCommand = "uname -r";
+#endif
+
 TEST_CASE("Kernel Name", "[KernelName]") {
   auto kernelName = getCommand("uname");
   REQUIRE(DebugInfo::getKernel_Name() == kernelName);

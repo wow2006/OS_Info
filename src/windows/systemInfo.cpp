@@ -1,9 +1,12 @@
-#include "windows\systemInfo.hpp"
-#include <VersionHelpers.h>
+#include "windows/systemInfo.hpp"
 #include <iostream>
 #include <array>
 #include <vector>
-#include <intrin.h>  
+#include <SDL2\SDL.h>
+
+#ifdef _MSC_VER
+#include <VersionHelpers.h>
+#include <intrin.h>
 
 typedef BOOL(WINAPI *LPFN_GLPI)(
   PSYSTEM_LOGICAL_PROCESSOR_INFORMATION,
@@ -236,3 +239,4 @@ std::string systemInfo::getWindowsName() {
 
   return "Unknown";
 }
+#endif

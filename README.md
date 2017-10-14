@@ -9,5 +9,5 @@
 | Memory        | DONE  | DONE         |               |
 | Distro Info   | DONE  | DONE         |               |
 | libc Version  | DONE  | DONE         |               |
-| Dispay Server | DONE  |              |               |
-| GL Version    | DONE  |              |               |
+| Dispay Server | DONE  | DONE         |               |
+| GL Version    | DONE  | DONE         |               |

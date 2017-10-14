@@ -3,64 +3,60 @@
 #include <fstream>
 #include <sstream>
 
-#ifdef _MSC_VER
+#ifdef _WINDOWS
+#if defined(_MSC_VER)
 #include "windows\systemInfo.hpp"
+#elif defined(__MINGW32__)
+#endif //!_MSC_VER
 #else
 #include "linux/kernelInfo.hpp"
 #include "linux/hardwareInfo.hpp"
 #include "linux/distroInfo.cpp"
-#include "linux/sdlInfo.hpp"
 #include "linux/glibcInfo.hpp"
-#endif
+#endif //!_WINDOWS
+#include "sdlInfo.hpp"
 
 std::array<DebugInfo::stringMap, DebugInfo::COUNT> DebugInfo::mInfo;
 
 using map = std::unordered_map<std::string, std::string>;
 
-#ifdef _MSC_VER
-bool DebugInfo::isInitlized() {
-  auto& kernel = mInfo[DebugInfo::Kernel];
-  auto& cpu = mInfo[DebugInfo::CPU];
-  auto& distro = mInfo[DebugInfo::Distro];
-  auto& mem = mInfo[DebugInfo::Mem];
-  systemInfo::readSystemInfo(kernel, cpu, mem);
 
-  auto& clib = mInfo[DebugInfo::GLibC];
-  clib["LibcVersion"] = std::to_string(_MSC_VER);
-
-  distro["DistroName"] = "Windows";
-  distro["DistroVersion"] = systemInfo::getWindowsName();
-  return true;
-}
-#else
 bool DebugInfo::isInitlized() {
-  // Read Kernel Info
   auto& kernelInfo = mInfo[DebugInfo::Kernel];
+  auto& cpuInfo    = mInfo[DebugInfo::CPU];
+  auto& memInfo    = mInfo[DebugInfo::Mem];
+  auto& distroInfo = mInfo[DebugInfo::Distro];
+  auto& sdlInfo    = mInfo[DebugInfo::SDL_Version];
+  auto& disInfo    = mInfo[DebugInfo::DisplayServer];
+  auto& GPUInfo    = mInfo[DebugInfo::GPU];
+  auto& glInfo     = mInfo[DebugInfo::OpenGL];
+  auto& glibcInfo  = mInfo[DebugInfo::GLibC];
+  SdlInfo::read_SDL(sdlInfo, disInfo, glInfo, GPUInfo, cpuInfo, memInfo);
+  SdlInfo::destory_SDL();
+#ifdef _MSC_VER
+  systemInfo::readSystemInfo(kernelInfo, cpuInfo, memInfo);
+
+  glibcInfo["version"] = std::to_string(_MSC_VER);
+
+  //distroInfo["DistroName"]    = "Windows";
+  //distroInfo["DistroVersion"] = systemInfo::getWindowsName();
+#else
+  // Read Kernel Info
   KernelInfo::read_uname(kernelInfo);
   // Read CPU Info
-  auto& cpuInfo = mInfo[DebugInfo::CPU];
   HardwareInfo::read_cpuInfo(cpuInfo);
   // Read Mem Info
-  auto& memInfo = mInfo[DebugInfo::Mem];
   HardwareInfo::read_memInfo(memInfo);
   // Read Distro Info
-  auto& distroInfo = mInfo[DebugInfo::Distro];
   if (!DistroInfo::read_distroInfo("/etc/os-release", distroInfo)) {
     DistroInfo::read_distroInfo("/etc/lsb-release", distroInfo);
   }
   // Read libc Info
-  auto& glibc = mInfo[DebugInfo::GLibC];
-  GlibcInfo::read_glibc(glibc);
-  // Read Display Server
-  auto& gpu = mInfo[DebugInfo::GPU];
-  auto& sdlVersion = mInfo[DebugInfo::SDL_Version];
-  auto& displayServer = mInfo[DebugInfo::DisplayServer];
-  auto& glVersion = mInfo[DebugInfo::OpenGL];
-  SdlInfo::read_SDL(sdlVersion, displayServer, glVersion, gpu);
-
+  GlibcInfo::read_glibc(glibcInfo);
+#endif
   return true;
 }
-#endif
+
 
 std::string DebugInfo::getKernel_Name() {
   auto& kernel = mInfo[DebugInfo::Kernel];
@@ -89,7 +85,6 @@ std::string DebugInfo::getMem_Total() {
 
   return mem["MemTotal"];
 }
-
 
 std::string DebugInfo::getMem_Free(bool forceToReload) {
   auto& mem = mInfo[DebugInfo::Mem];

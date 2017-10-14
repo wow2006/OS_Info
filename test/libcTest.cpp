@@ -4,7 +4,7 @@
 #include "testutility.hpp"
 
 #if defined _MSC_VER
-constexpr auto command = "";
+constexpr auto command = "echo 1910";
 #else
 constexpr auto command = "ldd --version | awk '/ldd/ {print $NF}'";
 #endif

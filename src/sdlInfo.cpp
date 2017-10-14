@@ -1,25 +1,49 @@
 #include "sdlInfo.hpp"
 #include <iostream>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_cpuinfo.h>
 #include <SDL2/SDL_syswm.h>
 #include <GL/gl.h>
 
 using map = SdlInfo::map;
-bool SdlInfo::read_SDL(map& sdlVersion, map& displayServer, map& glVersionInfo,
-                       map& gpu) {
+
+bool SdlInfo::isinitialized = false;
+
+bool SdlInfo::init_SDL() {
+  if (isinitialized)
+    return true;
+
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     std::cerr << "Can not Create SDL init\n";
     return false;
   }
 
-  SDL_SysWMinfo sysinfo;
-  SDL_Window* window =
-      SDL_CreateWindow("", 0, 0, 0, 0, SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL);
+  return (isinitialized = true);
+}
+
+bool SdlInfo::destory_SDL() {
+  if (!isinitialized)
+    return false;
+
+  SDL_Quit();
+  return (isinitialized = false);
+}
+
+bool SdlInfo::read_SDL(map& sdlVersion, map& displayServer, map& glVersionInfo,
+  map& gpu, map& cpuInfo, map& memInfo) {
+  if (!init_SDL()) return false;
+
+  SDL_SysWMinfo sysinfo = {};
+  // Create SDL window with OpenGL and Hidden
+  auto window = SDL_CreateWindow("", 0, 0, 0, 0, SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL);
+  if (!window) {
+    destory_SDL();
+    return false;
+  }
+  // Create OpenGL Context
   auto maincontext = SDL_GL_CreateContext(window);
-  if (!window) return false;
-
+  // Get SDL Version
   SDL_GetVersion(&sysinfo.version);
-
   std::string version = std::to_string(sysinfo.version.major) + "." +
                         std::to_string(sysinfo.version.minor);
   sdlVersion["version"].swap(version);
@@ -67,15 +91,14 @@ bool SdlInfo::read_SDL(map& sdlVersion, map& displayServer, map& glVersionInfo,
       break;
 #endif
   }
-
-  std::string glVendor = reinterpret_cast<char const*>(glGetString(GL_VENDOR));
+  // Get GPU Vendor
+  std::string glVendor =  reinterpret_cast<char const*>(glGetString(GL_VENDOR));
   gpu["glVendor"].swap(glVendor);
-  std::string glVersion =
-      reinterpret_cast<char const*>(glGetString(GL_VERSION));
+  // Get OpenGL Version
+  std::string glVersion = reinterpret_cast<char const*>(glGetString(GL_VERSION));
   glVersionInfo["glVersion"].swap(glVersion);
-
-  std::string glRenderer =
-      reinterpret_cast<char const*>(glGetString(GL_RENDERER));
+  // Get Renderer
+  std::string glRenderer = reinterpret_cast<char const*>(glGetString(GL_RENDERER));
   if (glRenderer.find("NVIDIA") != std::string::npos) {
     const GLenum GL_GPU_MEM_INFO_TOTAL_AVAILABLE_MEM_NVX = 0x9048;
     const GLenum GL_GPU_MEM_INFO_CURRENT_AVAILABLE_MEM_NVX = 0x9049;
@@ -93,11 +116,14 @@ bool SdlInfo::read_SDL(map& sdlVersion, map& displayServer, map& glVersionInfo,
   } else if (glRenderer.find("AMD") || glRenderer.find("ATI")) {
   } else if (glRenderer.find("Intel")) {
   }
-
   gpu["glRenderer"].swap(glRenderer);
 
+  cpuInfo["hyperThreadsCount"] = SDL_GetCPUCount();
+  cpuInfo["cacheSize"]         = SDL_GetCPUCacheLineSize();
+  memInfo["MemTotal"]          = SDL_GetSystemRAM();
+
+  // CleanUp
   SDL_GL_DeleteContext(maincontext);
   SDL_DestroyWindow(window);
-  SDL_Quit();
   return true;
 }

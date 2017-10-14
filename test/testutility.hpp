@@ -24,6 +24,7 @@ static std::string getCommand(std::string&& _command) {
       buffer << buff.data();
     }
   }
+
   return buffer.str();
 }
 
