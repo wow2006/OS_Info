@@ -3,7 +3,7 @@
 #include "DebugInfo.hpp"
 #include "testutility.hpp"
 
-#if defined _MSC_VER
+#ifdef _MSC_VER
 constexpr auto CpuModelCommand    = "echo GenuineIntel";
 constexpr auto CpuVendorIdCommand = "echo 1";
 constexpr auto CpuCacheCommand    = "echo 32kB";
