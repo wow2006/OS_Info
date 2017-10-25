@@ -118,9 +118,9 @@ bool SdlInfo::read_SDL(map& sdlVersion, map& displayServer, map& glVersionInfo,
   }
   gpu["glRenderer"].swap(glRenderer);
 
-  cpuInfo["hyperThreadsCount"] = SDL_GetCPUCount();
-  cpuInfo["cacheSize"]         = SDL_GetCPUCacheLineSize();
-  memInfo["MemTotal"]          = SDL_GetSystemRAM();
+  cpuInfo["hyperThreadsCount"] = std::to_string(SDL_GetCPUCount());
+  cpuInfo["cacheSize"]         = std::to_string(SDL_GetCPUCacheLineSize());
+  memInfo["MemTotal"]          = std::to_string(SDL_GetSystemRAM());
 
   // CleanUp
   SDL_GL_DeleteContext(maincontext);

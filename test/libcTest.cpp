@@ -3,7 +3,7 @@
 #include "DebugInfo.hpp"
 #include "testutility.hpp"
 
-#if defined _MSC_VER
+#if defined _WIN32
 constexpr auto command = "echo 1910";
 #else
 constexpr auto command = "ldd --version | awk '/ldd/ {print $NF}'";

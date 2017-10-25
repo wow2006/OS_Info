@@ -3,7 +3,7 @@
 #include "DebugInfo.hpp"
 #include "testutility.hpp"
 
-#if defined _MSC_VER
+#if defined _WIN32
 constexpr auto CpuModelCommand    = "echo Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz";
 constexpr auto CpuVendorIdCommand = "echo GenuineIntel";
 constexpr auto CpuCacheCommand    = "echo 32kB";

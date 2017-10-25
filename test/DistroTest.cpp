@@ -3,7 +3,7 @@
 #include "DebugInfo.hpp"
 #include "testutility.hpp"
 
-#if defined _MSC_VER
+#if defined _WIN32
 constexpr auto DistroNameStr = "echo Windows";
 constexpr auto DistroVersion = "echo Windows8";
 #else

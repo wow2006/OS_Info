@@ -4,7 +4,7 @@
 #include "testutility.hpp"
 
 
-#if defined _MSC_VER
+#if defined _WIN32
 constexpr auto MemTotalCommand  = "echo 4095MB";
 constexpr auto SwapTotalCommand = "echo 5503MB";
 constexpr auto MemFreeCommand   = "echo 1";
