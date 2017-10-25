@@ -4,10 +4,10 @@
 
 |               | Linux | Windows VC++ | Windows MinGW |
 |---------------|-------|--------------|---------------|
-| Kernel        | DONE  |              |               |
+| Kernel        | DONE  | DONE         |               |
 | CPU           | DONE  | DONE         |               |
-| Memory        | DONE  | DONE         |               |
+| Memory        | DONE  | DONE         | DONE          |
 | Distro Info   | DONE  | DONE         |               |
 | libc Version  | DONE  | DONE         |               |
-| Dispay Server | DONE  | DONE         |               |
-| GL Version    | DONE  | DONE         |               |
+| Dispay Server | DONE  | DONE         | DONE          |
+| GL Version    | DONE  | DONE         | DONE          |

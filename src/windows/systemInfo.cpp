@@ -2,17 +2,49 @@
 #include <iostream>
 #include <array>
 #include <vector>
-//#include <SDL2\SDL.h>
 
 #ifdef _MSC_VER
-//#include <VersionHelpers.h>
-//#include <intrin.h>
-
 typedef BOOL(WINAPI *LPFN_GLPI)(
   PSYSTEM_LOGICAL_PROCESSOR_INFORMATION,
   PDWORD);
+#endif
 
 using map = systemInfo::map;
+
+std::vector<std::string> readRegsitery(const std::string& regKey, const std::vector<std::string> keys) {
+  DWORD dwMHz = _MAX_PATH;
+  HKEY hKey;
+
+  // open the key where the proc speed is hidden:
+  long lError = RegOpenKeyEx(HKEY_LOCAL_MACHINE,
+    regKey.c_str(),
+    0, KEY_READ, &hKey);
+  if (lError != ERROR_SUCCESS) {
+    std::cerr << "Can not found " << regKey << '\n';
+    return {};
+  }
+
+  DWORD bufferSize = 256;
+  char buffer[256];
+  std::vector<std::string> output(keys.size());
+  for (int i = 0; i < output.size(); ++i) {
+    RegQueryValueEx(hKey, keys[i].c_str(), NULL, NULL, (LPBYTE)buffer, &bufferSize);
+    output[i] = buffer;
+    memset(buffer, 0, sizeof(buffer));
+  }
+  return output;
+}
+
+void readCPUInfo(map& cpuInfo) {
+  
+  const std::string cpuRegKey = "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0";
+  const std::string cpuNameValueData = "ProcessorNameString";
+  const std::string vendorNameValueData = "VendorIdentifier";
+  // query the key:
+  auto info = readRegsitery(cpuRegKey, { cpuNameValueData, vendorNameValueData });
+  cpuInfo["modelName"] = info[0];
+  cpuInfo["vendorId"]  = info[1];
+}
 
 // Helper function to count set bits in the processor mask.
 DWORD systemInfo::CountSetBits(ULONG_PTR bitMask)
@@ -37,6 +69,10 @@ void systemInfo::readSystemInfo(map& kernelInfo, map& cpuInfo, map& memInfo) {
     DWORD byteOffset   = 0;
     DWORD returnLength = 0;
     BOOL done = FALSE;
+
+    readCPUInfo(cpuInfo);
+
+#ifdef _MSC_VER
     PSYSTEM_LOGICAL_PROCESSOR_INFORMATION buffer = NULL;
     PSYSTEM_LOGICAL_PROCESSOR_INFORMATION ptr = NULL;
 
@@ -138,8 +174,10 @@ void systemInfo::readSystemInfo(map& kernelInfo, map& cpuInfo, map& memInfo) {
     cpuInfo["cacheSize"] = std::to_string(int(processorL1Cache / 1024)) + "kB";
     cpuInfo["cacheSize2"] = std::to_string(int(processorL2Cache / 1024)) + "kB";
     cpuInfo["cacheSize3"] = std::to_string(int(processorL3Cache / 1024)) + "kB";
-    cpuInfo["cpuCores"] = std::to_string(processorCoreCount);
+    //cpuInfo["cpuCores"] = std::to_string(processorCoreCount);
+    //std::cout << "processorCoreCount : " << processorCoreCount << '/n';
     cpuInfo["hyperThreadsCount"] = std::to_string(logicalProcessorCount);
+#endif
   }
 
   SYSTEM_INFO info;
@@ -148,17 +186,21 @@ void systemInfo::readSystemInfo(map& kernelInfo, map& cpuInfo, map& memInfo) {
   switch (info.wProcessorArchitecture)
   {
   case PROCESSOR_ARCHITECTURE_AMD64:
-    kernelInfo["CPU_Arch"] = "x64";
+    kernelInfo["machine"] = "x64";
     break;
   case PROCESSOR_ARCHITECTURE_INTEL:
-    kernelInfo["CPU_Arch"] = "x86";
+    kernelInfo["machine"] = "x86";
     break;
   case PROCESSOR_ARCHITECTURE_ARM:
-    kernelInfo["CPU_Arch"] = "ARM";
+    kernelInfo["machine"] = "ARM";
+    break;
+  default:
+    kernelInfo["machine"] = "UnKnown";
     break;
   }
+  cpuInfo["cpuCores"] = std::to_string(info.dwNumberOfProcessors);
 
-  {//
+  {// Read Memory
     MEMORYSTATUSEX statex;
     statex.dwLength = sizeof(statex);
     GlobalMemoryStatusEx(&statex);
@@ -202,4 +244,4 @@ std::string systemInfo::getWindowsName() {
   }
   return "Unknown";
 }
-#endif
+//#endif

@@ -3,11 +3,8 @@
 #include <fstream>
 #include <sstream>
 
-#ifdef _WINDOWS
-#if defined(_MSC_VER)
+#ifdef _WIN32
 #include "windows\systemInfo.hpp"
-#elif defined(__MINGW32__)
-#endif //!_MSC_VER
 #else
 #include "linux/kernelInfo.hpp"
 #include "linux/hardwareInfo.hpp"
@@ -36,17 +33,18 @@ bool DebugInfo::isInitlized() {
 
 #ifdef _MSC_VER
   glibcInfo["version"] = std::to_string(_MSC_VER);
-#else
+#elif defined(__linux__)
   // Read libc Info
   GlibcInfo::read_glibc(glibcInfo);
 #endif
 
-#ifdef _WINDOWS
+#ifdef _WIN32
   systemInfo::readSystemInfo(kernelInfo, cpuInfo, memInfo);
 
   distroInfo["NAME"]       = "Windows";
   distroInfo["VERSION_ID"] = systemInfo::getWindowsName();
 #else
+#pragma message("LINUX")
   // Read Kernel Info
   KernelInfo::read_uname(kernelInfo);
   // Read CPU Info
@@ -92,7 +90,7 @@ std::string DebugInfo::getMem_Total() {
 
 std::string DebugInfo::getMem_Free(bool forceToReload) {
   auto& mem = mInfo[DebugInfo::Mem];
-#ifdef _MSC_VER
+#ifdef _WIN32
 #else
   if (forceToReload) {
     HardwareInfo::read_memInfo(mem);

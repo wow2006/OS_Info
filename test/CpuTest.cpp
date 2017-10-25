@@ -4,8 +4,8 @@
 #include "testutility.hpp"
 
 #if defined _MSC_VER
-constexpr auto CpuModelCommand    = "echo GenuineIntel";
-constexpr auto CpuVendorIdCommand = "echo 1";
+constexpr auto CpuModelCommand    = "echo Intel(R) Core(TM) i7-6700HQ CPU @ 2.60GHz";
+constexpr auto CpuVendorIdCommand = "echo GenuineIntel";
 constexpr auto CpuCacheCommand    = "echo 32kB";
 constexpr auto CpuCoresCommand    = "echo 1";
 constexpr auto CpuHyperthreadingCountCommand = "echo 1";

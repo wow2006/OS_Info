@@ -16,7 +16,7 @@ endif()
 
 add_library(SystemInfo STATIC DebugInfo.cpp ${src})
 target_include_directories(SystemInfo PUBLIC ${include_list})
-target_link_libraries(SystemInfo ${link_list})
+target_link_libraries(SystemInfo "-lmingw32 -mwindows -mconsole -LC:/Users/Test/Source/Repos/OS_Info/3rdparty/SDL2-2.0.6_MINGW/i686-w64-mingw32/lib -lSDL2main -lSDL2")
 
 target_compile_features(SystemInfo PUBLIC cxx_auto_type)
 if(USE_SDL)

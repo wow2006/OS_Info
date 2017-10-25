@@ -54,6 +54,7 @@ endif()
 	"${TARGET_DIR}/lib/x64/SDL2.dll" "${CMAKE_BINARY_DIR}/SDL2.dll")
 
 	set(SDL2_INCLUDE_DIR "${TARGET_DIR}/include")
-	set(SDL2_LIBRARY "${TARGET_DIR}/lib/x64/SDL2.lib"
+	set(SDL2_LIBRARY
+           "${TARGET_DIR}/lib/x64/SDL2.lib"
 					 "${TARGET_DIR}/lib/x64/SDL2main.lib")
 endif()

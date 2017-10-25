@@ -23,7 +23,7 @@ TEST_CASE("Memory Total", "[MemTotal]") {
   REQUIRE(DebugInfo::getMem_Total() == systemCommand);
 }
 
-
+/*
 TEST_CASE("Swap Total", "[SwapTotal]") {
 	auto systemCommand = getCommand(SwapTotalCommand);
   DebugInfo::isInitlized();
@@ -31,7 +31,7 @@ TEST_CASE("Swap Total", "[SwapTotal]") {
   REQUIRE(swap == systemCommand);
 }
 
-/*
+
 TEST_CASE("Mem Free", "[MemFree]") {
   auto systemCommand = getCommand(MemFreeCommand);
   REQUIRE(SystemInfo::getMem_Free(true) == systemCommand);
